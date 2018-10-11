@@ -83,10 +83,9 @@
             // labProgress
             // 
             this.labProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labProgress.AutoSize = true;
-            this.labProgress.Location = new System.Drawing.Point(775, 305);
+            this.labProgress.Location = new System.Drawing.Point(715, 305);
             this.labProgress.Name = "labProgress";
-            this.labProgress.Size = new System.Drawing.Size(13, 13);
+            this.labProgress.Size = new System.Drawing.Size(73, 13);
             this.labProgress.TabIndex = 4;
             this.labProgress.Text = "0";
             this.labProgress.TextAlign = System.Drawing.ContentAlignment.TopRight;

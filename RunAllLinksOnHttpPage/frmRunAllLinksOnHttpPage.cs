@@ -17,6 +17,7 @@ namespace RunAllLinksOnHttpPage
         private int MaxDepth;
         private int NoOfLinks;
         private const string BrowserType = @"firefox";
+        private readonly List<string> listOfForbiddenExt = new List<string> { "NONE", ".VSIX", ".EXE", ".ZIP", ".BZ2", ".JPG", ".BMP", ".PNG", ".XLSX", ".PDF", ".DOC" };
         private readonly List<string> UrlList = new List<string>();
         private readonly BackgroundWorker bw = new BackgroundWorker();
         private readonly Random random = new Random();
@@ -61,6 +62,8 @@ namespace RunAllLinksOnHttpPage
         private void Form1_Load(object sender, EventArgs e)
         {
             //RetrievePagesBatch();
+
+            EndsWithForbiddenExtension(@"http://www.ametsoc.net/eee/2016/ch20.pdf");
         }
 
         private void RetrievePagesBatch()
@@ -92,6 +95,17 @@ namespace RunAllLinksOnHttpPage
             }
         }
 
+        private bool EndsWithForbiddenExtension(string value)
+        {
+            foreach (var ext in listOfForbiddenExt)
+            {
+                value = value.ToUpper();
+                if (value.EndsWith(ext))
+                    return true;
+            }
+            return false;
+        }
+
         private void RetrievePages(string url, int deep)
         {
             try
@@ -113,16 +127,23 @@ namespace RunAllLinksOnHttpPage
                     if (link != null)
                     {
                         HtmlAttribute att = link.Attributes["href"];
-                        if ((att.Value.Length > 7) &&
+                        if ((att.Value.Length > 12) &&
                             (att.Value.Substring(0, 4).ToUpper() == "HTTP") &&
-                            (att.Value.Substring(att.Value.Length - 5, 5).ToUpper() != ".VSIX") &&
-                            (att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".EXE") &&
-                            (att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".ZIP") &&
-                            (att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".BZ2") &&
-                            !(att.Value.Contains("www.visitcostarica.com"))
+                            //(att.Value.Substring(att.Value.Length - 5, 5).ToUpper() != ".VSIX") &&
+                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".EXE") &&
+                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".ZIP") &&
+                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".BZ2") &&
+                            !EndsWithForbiddenExtension(att.Value) &&
+                            !(att.Value.Contains("www.visitcostarica.com")) &&
+                            !(att.Value.Contains("twitter.com/intent/tweet")) &&
+                            !(att.Value.Contains("help.twitter.com")) &&
+                            !(att.Value.Contains("plus.google.com/share")) &&
+                            !(att.Value.Contains("www.facebook.com"))
                             )
                         {
-                            if (!UrlList.Contains(att.Value))
+                            //if ((!UrlList.Contains(att.Value)) &&
+                            //    (!UrlList.EndWithPart(att.Value.Substring(att.Value.Length - Math.Min(att.Value.Length, 20)))))
+                            if (!UrlList.EndWithPart(att.Value.Substring(att.Value.Length - Math.Min(att.Value.Length, 20))))
                             {
                                 UrlList.Add(att.Value);
                                 NoOfLinks++;

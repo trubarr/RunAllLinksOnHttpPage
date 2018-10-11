@@ -18,5 +18,15 @@ namespace RunAllLinksOnHttpPage.Collections.Generic
                 list[n] = value;
             }
         }
+
+        public static bool EndWithPart<T>(this IList<T> list, string part)
+        {
+            foreach (var item in list)
+            {
+                if (item.ToString().EndsWith(part))
+                    return true;
+            }
+            return false;
+        }
     }
 }
