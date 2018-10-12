@@ -1,14 +1,15 @@
 ﻿using HtmlAgilityPack;
+using RunAllLinksOnHttpPage.Collections.Generic;
+using RunAllLinksOnHttpPage.Logging;
 using Serilog;
+using Serilog.Events;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using RunAllLinksOnHttpPage.Collections.Generic;
-using RunAllLinksOnHttpPage.Logging;
-using Serilog.Events;
 
 namespace RunAllLinksOnHttpPage
 {
@@ -17,7 +18,33 @@ namespace RunAllLinksOnHttpPage
         private int MaxDepth;
         private int NoOfLinks;
         private const string BrowserType = @"firefox";
-        private readonly List<string> listOfForbiddenExt = new List<string> { "NONE", ".VSIX", ".EXE", ".ZIP", ".BZ2", ".JPG", ".BMP", ".PNG", ".XLSX", ".PDF", ".DOC" };
+        private readonly List<string> listOfForbiddenExt = new List<string>
+        {
+            "NONE",
+            ".VSIX",
+            ".EXE",
+            ".ZIP",
+            ".BZ2",
+            ".JPG",
+            ".BMP",
+            ".PNG",
+            ".XLSX",
+            ".PDF",
+            ".DOC"
+        };
+        private readonly List<string> listOfForbiddenValues = new List<string>
+            {
+                "www.visitcostarica.com",
+                "twitter.com/intent/tweet",
+                "help.twitter.com",
+                "plus.google.com/share",
+                "accounts.google.com",
+                "play.google.com/store",
+                "docs.google.com",
+                "support.google.com",
+                "www.facebook.com",
+                "itunes.apple.com"
+            };
         private readonly List<string> UrlList = new List<string>();
         private readonly BackgroundWorker bw = new BackgroundWorker();
         private readonly Random random = new Random();
@@ -25,7 +52,7 @@ namespace RunAllLinksOnHttpPage
 
         public FrmRunAllLinksOnHttpPage()
         {
-            InitializeComponent(); 
+            InitializeComponent();
 
             FormBorderStyle = FormBorderStyle.FixedSingle;
 
@@ -63,7 +90,7 @@ namespace RunAllLinksOnHttpPage
         {
             //RetrievePagesBatch();
 
-            EndsWithForbiddenExtension(@"http://www.ametsoc.net/eee/2016/ch20.pdf");
+            //EndsWithForbiddenExtension(@"http://www.ametsoc.net/eee/2016/ch20.pdf");
         }
 
         private void RetrievePagesBatch()
@@ -91,7 +118,6 @@ namespace RunAllLinksOnHttpPage
             finally
             {
                 Log.Information("End");
-                //Application.Exit();
             }
         }
 
@@ -99,8 +125,18 @@ namespace RunAllLinksOnHttpPage
         {
             foreach (var ext in listOfForbiddenExt)
             {
-                value = value.ToUpper();
-                if (value.EndsWith(ext))
+                if (value.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool ContainsForbiden(string value)
+        {
+            foreach (var forbiddenValue in listOfForbiddenValues)
+            {
+                //if (value.Contains(forbiddenValue))
+                if (value.IndexOf(forbiddenValue, StringComparison.OrdinalIgnoreCase) >= 0)
                     return true;
             }
             return false;
@@ -114,6 +150,7 @@ namespace RunAllLinksOnHttpPage
                 HtmlAgilityPack.HtmlDocument doc = hw.Load(url);
                 //foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
                 HtmlNodeCollection htmlNodes = doc.DocumentNode.SelectNodes("//a[@href]");
+                htmlNodes.Shuffle();
                 for (int i = 0; i < htmlNodes.Count - 1; i++)
                 {
                     if (bw.CancellationPending)
@@ -134,11 +171,13 @@ namespace RunAllLinksOnHttpPage
                             //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".ZIP") &&
                             //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".BZ2") &&
                             !EndsWithForbiddenExtension(att.Value) &&
-                            !(att.Value.Contains("www.visitcostarica.com")) &&
-                            !(att.Value.Contains("twitter.com/intent/tweet")) &&
-                            !(att.Value.Contains("help.twitter.com")) &&
-                            !(att.Value.Contains("plus.google.com/share")) &&
-                            !(att.Value.Contains("www.facebook.com"))
+                            //!(att.Value.Contains("www.visitcostarica.com")) &&
+                            //!(att.Value.Contains("twitter.com/intent/tweet")) &&
+                            //!(att.Value.Contains("help.twitter.com")) &&
+                            //!(att.Value.Contains("plus.google.com/share")) &&
+                            //!(att.Value.Contains("docs.google.com")) && 
+                            //!(att.Value.Contains("www.facebook.com") &&
+                            !ContainsForbiden(att.Value)
                             )
                         {
                             //if ((!UrlList.Contains(att.Value)) &&
@@ -148,10 +187,10 @@ namespace RunAllLinksOnHttpPage
                                 UrlList.Add(att.Value);
                                 NoOfLinks++;
                                 bw.ReportProgress(NoOfLinks);
-                                Log.Information(NoOfLinks.ToString() + ": " + att.Value);
+                                Log.Information(NoOfLinks + ": " + att.Value);
                                 //Console.WriteLine(NoOfLinks.ToString() + ": " + att.Value);
 
-                                if (random.Next(0, 100) % 2 == 0)
+                                if (random.Next(1, 100) % 2 == 0)
                                 {
                                     LoadPage(att.Value);
                                     RetrieveNextPages(att.Value, deep);
@@ -199,7 +238,7 @@ namespace RunAllLinksOnHttpPage
                         //CreateNoWindow = true,
                         //WorkingDirectory = @"C:\temp\browser",
                         //UseShellExecute = false
-            }
+                    }
                 };
                 // att.Value;
                 //proc.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;

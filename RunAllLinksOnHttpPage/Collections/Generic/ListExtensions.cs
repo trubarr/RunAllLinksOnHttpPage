@@ -7,7 +7,7 @@ namespace RunAllLinksOnHttpPage.Collections.Generic
     {
         private static readonly Random rng = new Random();
         public static void Shuffle<T>(this IList<T> list)
-        {         
+        {
             int n = list.Count;
             while (n > 1)
             {
@@ -23,7 +23,7 @@ namespace RunAllLinksOnHttpPage.Collections.Generic
         {
             foreach (var item in list)
             {
-                if (item.ToString().EndsWith(part))
+                if (item.ToString().EndsWith(part, StringComparison.OrdinalIgnoreCase))
                     return true;
             }
             return false;
