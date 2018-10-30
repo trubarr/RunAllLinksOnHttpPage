@@ -43,9 +43,11 @@ namespace RunAllLinksOnHttpPage
                 "docs.google.com",
                 "support.google.com",
                 "www.facebook.com",
-                "itunes.apple.com"
+                "itunes.apple.com",
+                ".tar."
             };
         private readonly List<string> UrlList = new List<string>();
+        private readonly ConcurrentBag<string> UrlListToProcess = new ConcurrentBag<string>();
         private readonly BackgroundWorker bw = new BackgroundWorker();
         private readonly Random random = new Random();
         private static readonly ManualResetEvent Mre = new ManualResetEvent(false);
@@ -135,7 +137,6 @@ namespace RunAllLinksOnHttpPage
         {
             foreach (var forbiddenValue in listOfForbiddenValues)
             {
-                //if (value.Contains(forbiddenValue))
                 if (value.IndexOf(forbiddenValue, StringComparison.OrdinalIgnoreCase) >= 0)
                     return true;
             }
@@ -150,7 +151,7 @@ namespace RunAllLinksOnHttpPage
                 HtmlAgilityPack.HtmlDocument doc = hw.Load(url);
                 //foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
                 HtmlNodeCollection htmlNodes = doc.DocumentNode.SelectNodes("//a[@href]");
-                htmlNodes.Shuffle();
+                htmlNodes.ProperQuickShuffle(random);
                 for (int i = 0; i < htmlNodes.Count - 1; i++)
                 {
                     if (bw.CancellationPending)
@@ -166,45 +167,36 @@ namespace RunAllLinksOnHttpPage
                         HtmlAttribute att = link.Attributes["href"];
                         if ((att.Value.Length > 12) &&
                             (att.Value.Substring(0, 4).ToUpper() == "HTTP") &&
-                            //(att.Value.Substring(att.Value.Length - 5, 5).ToUpper() != ".VSIX") &&
-                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".EXE") &&
-                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".ZIP") &&
-                            //(att.Value.Substring(att.Value.Length - 4, 4).ToUpper() != ".BZ2") &&
                             !EndsWithForbiddenExtension(att.Value) &&
-                            //!(att.Value.Contains("www.visitcostarica.com")) &&
-                            //!(att.Value.Contains("twitter.com/intent/tweet")) &&
-                            //!(att.Value.Contains("help.twitter.com")) &&
-                            //!(att.Value.Contains("plus.google.com/share")) &&
-                            //!(att.Value.Contains("docs.google.com")) && 
-                            //!(att.Value.Contains("www.facebook.com") &&
-                            !ContainsForbiden(att.Value)
+                            !ContainsForbiden(att.Value) &&
+                            !UrlList.EndWithPart(att.Value.Substring(att.Value.Length - Math.Min(att.Value.Length, 20)))
                             )
                         {
                             //if ((!UrlList.Contains(att.Value)) &&
                             //    (!UrlList.EndWithPart(att.Value.Substring(att.Value.Length - Math.Min(att.Value.Length, 20)))))
-                            if (!UrlList.EndWithPart(att.Value.Substring(att.Value.Length - Math.Min(att.Value.Length, 20))))
+                            UrlList.Add(att.Value);
+                            UrlListToProcess.Add(att.Value);
+                            NoOfLinks++;
+                            bw.ReportProgress(NoOfLinks);
+                            Log.Information(NoOfLinks + ": " + att.Value);
+                            //Console.WriteLine(NoOfLinks.ToString() + ": " + att.Value);
+
+                            if (random.Next(i, htmlNodes.Count) % 2 == 0)
                             {
-                                UrlList.Add(att.Value);
-                                NoOfLinks++;
-                                bw.ReportProgress(NoOfLinks);
-                                Log.Information(NoOfLinks + ": " + att.Value);
-                                //Console.WriteLine(NoOfLinks.ToString() + ": " + att.Value);
+                                //Log.Information("Soda");
+                                LoadPage(att.Value);
+                                RetrieveNextPages(att.Value, deep);
+                            }
+                            else
+                            {
+                                //Log.Information("Liha");
+                                RetrieveNextPages(att.Value, deep);
+                                LoadPage(att.Value);
+                            }
 
-                                if (random.Next(1, 100) % 2 == 0)
-                                {
-                                    LoadPage(att.Value);
-                                    RetrieveNextPages(att.Value, deep);
-                                }
-                                else
-                                {
-                                    RetrieveNextPages(att.Value, deep);
-                                    LoadPage(att.Value);
-                                }
-
-                                if (MaxDepth != deep)
-                                {
-                                    RetrievePages(att.Value, deep + 1);
-                                }
+                            if (MaxDepth != deep)
+                            {
+                                RetrievePages(att.Value, deep + 1);
                             }
                         }
                     }
@@ -285,7 +277,7 @@ namespace RunAllLinksOnHttpPage
                 {
                     MaxDepth = int.Parse(numericUpDownMaxDepth.Text);
                     string[] lines = textBoxUrls.Lines;
-                    lines.Shuffle();
+                    lines.ProperQuickShuffle(random);
                     textBoxUrls.Lines = lines;
                     //textBoxUrls.Lines.Shuffle();
                     bw.RunWorkerAsync();
