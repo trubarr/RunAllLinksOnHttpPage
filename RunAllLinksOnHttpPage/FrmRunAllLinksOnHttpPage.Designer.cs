@@ -49,7 +49,7 @@
             this.textBoxUrls.Location = new System.Drawing.Point(12, 33);
             this.textBoxUrls.Multiline = true;
             this.textBoxUrls.Name = "textBoxUrls";
-            this.textBoxUrls.Size = new System.Drawing.Size(776, 262);
+            this.textBoxUrls.Size = new System.Drawing.Size(776, 309);
             this.textBoxUrls.TabIndex = 0;
             this.textBoxUrls.Text = resources.GetString("textBoxUrls.Text");
             // 
@@ -61,7 +61,7 @@
             // btnStart
             // 
             this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnStart.Location = new System.Drawing.Point(12, 301);
+            this.btnStart.Location = new System.Drawing.Point(12, 348);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(63, 20);
             this.btnStart.TabIndex = 2;
@@ -72,7 +72,7 @@
             // btnStop
             // 
             this.btnStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnStop.Location = new System.Drawing.Point(150, 301);
+            this.btnStop.Location = new System.Drawing.Point(150, 348);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(63, 20);
             this.btnStop.TabIndex = 3;
@@ -83,7 +83,7 @@
             // labProgress
             // 
             this.labProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labProgress.Location = new System.Drawing.Point(715, 305);
+            this.labProgress.Location = new System.Drawing.Point(715, 352);
             this.labProgress.Name = "labProgress";
             this.labProgress.Size = new System.Drawing.Size(73, 13);
             this.labProgress.TabIndex = 4;
@@ -93,7 +93,7 @@
             // btnPause
             // 
             this.btnPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnPause.Location = new System.Drawing.Point(81, 301);
+            this.btnPause.Location = new System.Drawing.Point(81, 348);
             this.btnPause.Name = "btnPause";
             this.btnPause.Size = new System.Drawing.Size(63, 20);
             this.btnPause.TabIndex = 5;
@@ -126,7 +126,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 326);
+            this.ClientSize = new System.Drawing.Size(800, 373);
             this.Controls.Add(this.numericUpDownMaxDepth);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnPause);

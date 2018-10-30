@@ -42,6 +42,7 @@ namespace RunAllLinksOnHttpPage
                 "play.google.com/store",
                 "docs.google.com",
                 "support.google.com",
+                "accounts.google.com",
                 "www.facebook.com",
                 "itunes.apple.com",
                 ".tar."
